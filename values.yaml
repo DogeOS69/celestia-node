@@ -1,0 +1,39 @@
+network: "mocha"
+node_type: "light"
+rpc_url: "https://rpc-mocha.pops.one"
+rpc_port: 9090
+
+image:
+  repository: "ghcr.io/celestiaorg/celestia-node"
+  tag: "v0.21.9"
+  pullPolicy: IfNotPresent
+
+storage:
+  size: "10Gi"
+
+service:
+  type: "ClusterIP"
+  ports:
+    p2p-tcp:
+      enabled: true
+      port: 2121
+      targetPort: 2121
+      protocol: TCP
+    p2p-udp:
+      enabled: true
+      port: 2121
+      targetPort: 2121
+      protocol: UDP
+    rpc:
+      enabled: true
+      port: 26658
+      targetPort: 26658
+      protocol: TCP
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"

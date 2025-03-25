@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celestia-node
+  template:
+    metadata:
+      labels:
+        app: celestia-node
+    spec:
+      initContainers:
+        - name: init-permissions
+          image: busybox:latest
+          command:
+            - "sh"
+            - "-c"
+            - "mkdir -p /home/celestia && chmod 777 /home/celestia"
+          volumeMounts:
+            - name: node-store
+              mountPath: /home/celestia
+        - name: init-node
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - "celestia"
+          args:
+            - "{{ .Values.node_type }}"
+            - "init"
+            - "--p2p.network"
+            - "{{ .Values.network }}"
+          env:
+            - name: NODE_TYPE
+              value: "{{ .Values.node_type }}"
+            - name: P2P_NETWORK
+              value: "{{ .Values.network }}"
+          volumeMounts:
+            - name: node-store
+              mountPath: /home/celestia
+      volumes:
+        - name: node-store
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+      containers:
+        - name: celestia-node
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - "celestia"
+          args:
+            - "{{ .Values.node_type }}"
+            - "start"
+            - "--core.ip"
+            - "{{ .Values.rpc_url }}"
+            - "--core.port"
+            - "{{ .Values.rpc_port }}"
+            - "--p2p.network"
+            - "{{ .Values.network }}"
+          env:
+            - name: NODE_TYPE
+              value: "{{ .Values.node_type }}"
+            - name: P2P_NETWORK
+              value: "{{ .Values.network }}"
+          volumeMounts:
+            - name: node-store
+              mountPath: /home/celestia
+          ports:
+            - name: p2p-tcp
+              containerPort: 2121
+              protocol: TCP
+            - name: p2p-udp
+              containerPort: 2121
+              protocol: UDP
+            - name: rpc
+              containerPort: 26658
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

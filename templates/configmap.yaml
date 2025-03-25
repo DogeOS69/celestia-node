@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-entrypoint
+data:
+  entrypoint.sh: |
+    #!/bin/sh
+    # Initialize if not already done
+    if [ ! -f /home/celestia/config.toml ]; then
+      celestia $NODE_TYPE init --p2p.network $P2P_NETWORK
+    fi
+    # Start the node
+    celestia $NODE_TYPE start --core.ip $RPC_URL --core.port $RPC_PORT --p2p.network $P2P_NETWORK
