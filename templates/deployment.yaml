@@ -57,6 +57,9 @@ spec:
             - "{{ .Values.rpc_port }}"
             - "--p2p.network"
             - "{{ .Values.network }}"
+            - "--rpc.addr"
+            - "0.0.0.0"
+            - "--rpc.skip-auth"  # Disable RPC auth
           env:
             - name: NODE_TYPE
               value: "{{ .Values.node_type }}"
