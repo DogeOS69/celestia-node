@@ -30,6 +30,22 @@ service:
       targetPort: 26658
       protocol: TCP
 
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: "celestia-rpc.dogeos.doge.xyz"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - secretName: "celestia-rpc-tls"
+      hosts:
+        - "celestia-rpc.dogeos.doge.xyz"
+
 resources:
   requests:
     cpu: "100m"
