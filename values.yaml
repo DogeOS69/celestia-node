@@ -13,7 +13,7 @@ share:
     # Minimum number of successful responses required
     minSamples: 5
     # Concurrency limit for data availability sampling
-    concurrencyLimit: 8
+    concurrencyLimit: 2
   light:
     trustedPeers: []
     trustedHeight: 0

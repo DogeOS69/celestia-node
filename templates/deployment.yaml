@@ -6,6 +6,11 @@ metadata:
     {{- include "celestia-node.labels" . | nindent 4 }}
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       {{- include "celestia-node.selectorLabels" . | nindent 6 }}
@@ -57,13 +62,11 @@ spec:
                 --core.ip {{ trimPrefix "https://" .Values.core.rpc_url }} \
                 --core.port {{ .Values.core.grpc_port }} \
                 --p2p.network {{ .Values.network }} \
-                --metrics \
-                --metrics.endpoint "0.0.0.0:9090" \
                 --keyring.backend test
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/sh", "-c", "pkill -SIGTERM celestia && sleep 10"]
+                command: ["/bin/sh", "-c", "pkill -SIGTERM celestia && sleep 5"]
           env:
             - name: HOME
               value: "/home/celestia"
