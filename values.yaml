@@ -74,6 +74,6 @@ resources:
 
 rpc:
   auth:
-    skipAuth: false
+    skipAuth: true
     username: "user"
     password: "password_test"

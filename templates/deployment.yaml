@@ -60,6 +60,10 @@ spec:
                 --metrics \
                 --metrics.endpoint "0.0.0.0:9090" \
                 --keyring.backend test
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "pkill -SIGTERM celestia && sleep 10"]
           env:
             - name: HOME
               value: "/home/celestia"

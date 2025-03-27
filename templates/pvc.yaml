@@ -7,7 +7,6 @@ metadata:
   annotations:
     pv.beta.kubernetes.io/gid: "1000"
 spec:
-  storageClassName: {{ include "celestia-node.fullname" . }}-retain
   accessModes:
     - ReadWriteOnce
   resources:

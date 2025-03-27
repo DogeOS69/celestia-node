@@ -35,10 +35,11 @@ data:
     [RPC]
     Address = "0.0.0.0"
     Port = "26658"
-    SkipAuth = {{ default false .Values.rpc.auth.skipAuth }}
+    SkipAuth = {{ .Values.rpc.auth.skipAuth }}
     [RPC.Auth]
       Username = "{{ .Values.rpc.auth.username }}"
       Password = "{{ .Values.rpc.auth.password }}"
+      Permissions = ["admin", "read", "write"]
 
     [Gateway]
     Address = "localhost"
