@@ -1,15 +1,8 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "celestia-node.fullname" . -}}
-{{- $svcPort := .Values.service.ports.rpc.port -}}
-{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
-  {{- end }}
-{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-rpc
+  name: {{ include "celestia-node.fullname" . }}
   labels:
     {{- include "celestia-node.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -17,9 +10,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
-  {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
     {{- range .Values.ingress.tls }}
@@ -40,9 +31,9 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}-service
+                name: {{ include "celestia-node.fullname" $ }}
                 port:
-                  number: {{ $svcPort }}
+                  name: rpc
           {{- end }}
     {{- end }}
 {{- end }}

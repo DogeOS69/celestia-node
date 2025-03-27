@@ -1,24 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.network }}
+  name: {{ include "celestia-node.fullname" . }}
+  labels:
+    {{- include "celestia-node.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: celestia-node
+      {{- include "celestia-node.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: celestia-node
+        {{- include "celestia-node.selectorLabels" . | nindent 8 }}
     spec:
       initContainers:
-        - name: init-permissions
-          image: busybox:latest
+        - name: init-dirs
+          image: "busybox:latest"
           command:
             - "sh"
             - "-c"
-            - "mkdir -p /home/celestia && chmod 777 /home/celestia"
+            - |
+              chmod 777 /home/celestia && \
+              mkdir -p /home/celestia/keys /home/celestia/data && \
+              chmod -R 777 /home/celestia
           volumeMounts:
             - name: node-store
               mountPath: /home/celestia
@@ -29,45 +34,43 @@ spec:
           args:
             - "{{ .Values.node_type }}"
             - "init"
-            - "--p2p.network"
-            - "{{ .Values.network }}"
+            - "--keyring.backend"
+            - "test"
           env:
-            - name: NODE_TYPE
-              value: "{{ .Values.node_type }}"
-            - name: P2P_NETWORK
-              value: "{{ .Values.network }}"
+            - name: HOME
+              value: "/home/celestia"
+            - name: CELESTIA_HOME
+              value: "/home/celestia"
           volumeMounts:
             - name: node-store
               mountPath: /home/celestia
-      volumes:
-        - name: node-store
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
       containers:
         - name: celestia-node
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
-            - "celestia"
+            - "sh"
+            - "-c"
           args:
-            - "{{ .Values.node_type }}"
-            - "start"
-            - "--core.ip"
-            - "{{ .Values.rpc_url }}"
-            - "--core.port"
-            - "{{ .Values.rpc_port }}"
-            - "--p2p.network"
-            - "{{ .Values.network }}"
-            - "--rpc.addr"
-            - "0.0.0.0"
-            - "--rpc.skip-auth"  # Disable RPC auth
+            - |
+              cp /config/config.toml /home/celestia/config.toml && \
+              celestia {{ .Values.node_type }} start \
+                --core.ip {{ trimPrefix "https://" .Values.core.rpc_url }} \
+                --core.port {{ .Values.core.grpc_port }} \
+                --p2p.network {{ .Values.network }} \
+                --metrics \
+                --metrics.endpoint "0.0.0.0:9090" \
+                --keyring.backend test
           env:
-            - name: NODE_TYPE
-              value: "{{ .Values.node_type }}"
-            - name: P2P_NETWORK
-              value: "{{ .Values.network }}"
+            - name: HOME
+              value: "/home/celestia"
+            - name: CELESTIA_HOME
+              value: "/home/celestia"
           volumeMounts:
             - name: node-store
               mountPath: /home/celestia
+            - name: node-config
+              mountPath: /config
+              readOnly: true
           ports:
             - name: p2p-tcp
               containerPort: 2121
@@ -78,5 +81,15 @@ spec:
             - name: rpc
               containerPort: 26658
               protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: node-store
+          persistentVolumeClaim:
+            claimName: {{ include "celestia-node.fullname" . }}-pvc
+        - name: node-config
+          configMap:
+            name: {{ include "celestia-node.fullname" . }}-config

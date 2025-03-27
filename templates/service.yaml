@@ -1,17 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-service
+  name: {{ include "celestia-node.fullname" . }}
+  labels:
+    {{- include "celestia-node.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: celestia-node
+    {{- include "celestia-node.selectorLabels" . | nindent 4 }}
   ports:
-    {{- range $name, $port := .Values.service.ports }}
-    {{- if $port.enabled }}
-    - name: {{ $name }}
-      port: {{ $port.port }}
-      targetPort: {{ $port.targetPort }}
-      protocol: {{ $port.protocol }}
+    {{- range $key, $value := .Values.service.ports }}
+    {{- if $value.enabled }}
+    - name: {{ $key }}
+      port: {{ $value.port }}
+      targetPort: {{ $value.targetPort }}
+      protocol: {{ $value.protocol }}
     {{- end }}
     {{- end }}

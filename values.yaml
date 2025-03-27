@@ -1,7 +1,25 @@
 network: "mocha"
 node_type: "light"
-rpc_url: "https://rpc-mocha.pops.one"
-rpc_port: 9090
+core:
+  rpc_url: "https://rpc-mocha.pops.one"
+  grpc_port: 9090
+
+share:
+  useExchange: true
+  discovery:
+    enabled: true
+    # Number of peers to sample for data availability sampling
+    sampleSize: 8
+    # Minimum number of successful responses required
+    minSamples: 5
+    # Concurrency limit for data availability sampling
+    concurrencyLimit: 8
+  light:
+    trustedPeers: []
+    trustedHeight: 0
+    samplingRange: 128
+    samplingPeriod: "1s"
+    waitForCheckpoint: false
 
 image:
   repository: "ghcr.io/celestiaorg/celestia-node"
@@ -9,7 +27,7 @@ image:
   pullPolicy: IfNotPresent
 
 storage:
-  size: "10Gi"
+  size: "250Gi"
 
 service:
   type: "ClusterIP"
@@ -53,3 +71,9 @@ resources:
   limits:
     cpu: "500m"
     memory: "4Gi"
+
+rpc:
+  auth:
+    skipAuth: false
+    username: "user"
+    password: "password_test"
