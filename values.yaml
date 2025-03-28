@@ -11,9 +11,9 @@ share:
     # Number of peers to sample for data availability sampling
     sampleSize: 8
     # Minimum number of successful responses required
-    minSamples: 1
+    minSamples: 2
     # Concurrency limit for data availability sampling
-    concurrencyLimit: 8
+    concurrencyLimit: 6
   light:
     trustedPeers: []
     trustedHeight: 0
