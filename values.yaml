@@ -23,7 +23,7 @@ share:
 
 image:
   repository: "ghcr.io/celestiaorg/celestia-node"
-  tag: "v0.21.9"
+  tag: "v0.22.0-mocha"
   pullPolicy: IfNotPresent
 
 storage:
