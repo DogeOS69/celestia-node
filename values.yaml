@@ -9,11 +9,11 @@ share:
   discovery:
     enabled: true
     # Number of peers to sample for data availability sampling
-    sampleSize: 4
+    sampleSize: 8
     # Minimum number of successful responses required
     minSamples: 2
     # Concurrency limit for data availability sampling
-    concurrencyLimit: 2
+    concurrencyLimit: 4
   light:
     trustedPeers: []
     trustedHeight: 0
