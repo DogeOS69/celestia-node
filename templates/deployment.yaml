@@ -41,37 +41,43 @@ spec:
             - "init"
             - "--keyring.backend"
             - "test"
-          env:
-            - name: HOME
-              value: "/home/celestia"
-            - name: CELESTIA_HOME
-              value: "/home/celestia"
           volumeMounts:
             - name: node-store
               mountPath: /home/celestia
+        - name: init-config
+          image: "busybox:latest"
+          command:
+            - "sh"
+            - "-c"
+            - |
+              cp /config/config.toml /home/celestia/config.toml && \
+              chmod 664 /home/celestia/config.toml
+          volumeMounts:
+            - name: node-store
+              mountPath: /home/celestia
+            - name: node-config
+              mountPath: /config
+              readOnly: true
       containers:
         - name: celestia-node
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
-            - "sh"
-            - "-c"
+            - celestia
           args:
-            - |
-              cp /config/config.toml /home/celestia/config.toml && \
-              celestia {{ .Values.node_type }} start \
-                --core.ip {{ trimPrefix "https://" .Values.core.rpc_url }} \
-                --core.port {{ .Values.core.grpc_port }} \
-                --p2p.network {{ .Values.network }} \
-                --keyring.backend test
+            - "{{ .Values.node_type }}"
+            - "start"
+            - "--core.ip"
+            - "{{ .Values.core.rpc_url }}"
+            - "--core.port"
+            - "{{ .Values.core.grpc_port }}"
+            - "--p2p.network"
+            - "{{ .Values.network }}"
+            - "--keyring.backend"
+            - "test"
           lifecycle:
             preStop:
               exec:
                 command: ["/bin/sh", "-c", "pkill -SIGTERM celestia && sleep 5"]
-          env:
-            - name: HOME
-              value: "/home/celestia"
-            - name: CELESTIA_HOME
-              value: "/home/celestia"
           volumeMounts:
             - name: node-store
               mountPath: /home/celestia
@@ -88,7 +94,7 @@ spec:
             - name: rpc
               containerPort: 26658
               protocol: TCP
-            - name: metrics
+            - name: core
               containerPort: 9090
               protocol: TCP
           resources:

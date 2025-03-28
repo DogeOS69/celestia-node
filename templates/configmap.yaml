@@ -12,7 +12,7 @@ data:
     Store = "/home/celestia"
 
     [Core]
-    IP = "{{ trimPrefix "https://" .Values.core.rpc_url }}"
+    IP = "{{ .Values.core.rpc_url }}"
     Port = "{{ .Values.core.grpc_port }}"
     TLSEnabled = false
 

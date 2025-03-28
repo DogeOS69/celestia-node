@@ -1,7 +1,7 @@
 network: "mocha"
 node_type: "light"
 core:
-  rpc_url: "https://rpc-mocha.pops.one"
+  rpc_url: rpc-mocha.pops.one
   grpc_port: 9090
 
 share:
@@ -66,10 +66,10 @@ ingress:
 
 resources:
   requests:
-    cpu: "100m"
+    cpu: "500m"
     memory: "2Gi"
   limits:
-    cpu: "500m"
+    cpu: "1000m"
     memory: "4Gi"
 
 rpc:
