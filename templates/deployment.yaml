@@ -26,8 +26,6 @@ spec:
             - "sh"
             - "-c"
             - |
-              chmod 777 /home/celestia && \
-              mkdir -p /home/celestia/keys /home/celestia/data && \
               chmod -R 777 /home/celestia
           volumeMounts:
             - name: node-store
@@ -41,6 +39,17 @@ spec:
             - "init"
             - "--keyring.backend"
             - "test"
+          volumeMounts:
+            - name: node-store
+              mountPath: /home/celestia
+        - name: fix-permissions
+          image: "busybox:latest"
+          command:
+            - "sh"
+            - "-c"
+            - |
+              find /home/celestia/keys -type d -exec chmod 700 {} \; && \
+              find /home/celestia/keys -type f -exec chmod 600 {} \;
           volumeMounts:
             - name: node-store
               mountPath: /home/celestia
